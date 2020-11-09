@@ -1,6 +1,6 @@
 <?php
 
-namespace Instasent\SMSCounter;
+namespace App\Base;
 
 class SMSCounter
 {
@@ -101,7 +101,7 @@ class SMSCounter
     {
         return array_merge(
             $this->getGsm7bitMap(),
-            $this->getAddedGsm7bitExMap()
+            $this->getAddedGsm7bitExMap(),
         );
     }
 
@@ -164,6 +164,12 @@ class SMSCounter
         ];
     }
 
+    //Vietnamese
+    public function getVietnameseGsm7bitExMap()
+    {
+        return [225,224,7843,227,7841,259,7855,7857,7859,7861,7863,226,7845,7847,7849,7851,7853,193,272,233,232,7867,7869,7865,234,7871,7873,7875,7877,7879,201,200,7866,7868,7864,202,7870,7872,7874,7876,7878,237,236,7881,297,7883,205,204,7880,296,7882,243,242,7887,245,7885,244,7889,7891,7893,7895,7897,417,7899,7901,7903,7905,7907,211,210,7886,213,7884,212,7888,7890,7892,7894,7896,416,7898,7900,7902,7904,7906,250,249,7911,361,7909,432,7913,7915,7917,7919,7921,218,217,7910,360,7908,431,7912,7914,7916,7918,7920,253,7923,7927,7929,7925,221,7922,7926,7928,7924];
+    }
+
     public function getAddedPortugueseGsm7bitExMap()
     {
         return [
@@ -208,7 +214,7 @@ class SMSCounter
         $encoding = $supportShiftTables
             ? $this->detectEncodingWithShiftTables($text, $exChars)
             : $this->detectEncoding($text, $exChars);
-
+            
         $length = count($unicodeArray);
 
         if ($encoding === self::GSM_7BIT_EX) {
@@ -304,6 +310,11 @@ class SMSCounter
             return self::UTF16;
         }
 
+        $utf16Chars = array_intersect($text, $this->getVietnameseGsm7bitExMap());
+        if (count($utf16Chars)) {
+            return self::UTF16;
+        }
+
         $exChars = array_intersect($text, $this->getAddedGsm7bitExMap());
         if (count($exChars)) {
             return self::GSM_7BIT_EX;
@@ -330,7 +341,8 @@ class SMSCounter
             $this->getAddedTurkishGsm7bitExMap(),
             $this->getAddedSpanishGsm7bitExMap(),
             $this->getPortugueseGsm7bitMap(),
-            $this->getAddedPortugueseGsm7bitExMap()
+            $this->getAddedPortugueseGsm7bitExMap(),
+            $this->getVietnameseGsm7bitExMap()
         );
 
         $utf16Chars = array_diff($text, $gsmCharMap);
@@ -525,6 +537,14 @@ class SMSCounter
         }
 
         $chars = [
+          //Mising chars
+          'à' => 'a',
+          'é' => 'e',
+          'è' => 'e',
+          'É' => 'E',
+          'ì' => 'i',
+          'ò' => 'o',
+          'ù' => 'u',
           // Decompositions for Latin-1 Supplement
           'ª' => 'a', 'º' => 'o',
           'À' => 'A', 'Á' => 'A',
@@ -690,7 +710,7 @@ class SMSCounter
           // grave accent
           'Ǜ' => 'U', 'ǜ' => 'u',
           // spaces
-          ' ' => ' ', ' ' => ' ',
+          ' ' => ' ', ' ' => ' ',
         ];
 
         $str = strtr($str, $chars);
